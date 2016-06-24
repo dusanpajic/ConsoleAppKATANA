@@ -8,6 +8,10 @@ using Microsoft.Owin.Hosting;
 
 namespace ConsoleApplicationKATANA
 {
+
+    using System.IO;
+    using AppFunc = Func<IDictionary<string, object>, Task>;
+
     class Program
     {
         static void Main(string[] args)
@@ -25,22 +29,48 @@ namespace ConsoleApplicationKATANA
 
     public class Startup     
     {
-        public void Configuration(IAppBuilder app)
+        public void Configuration(IAppBuilder appl)
         {
 
+            appl.UseHelloWorld();
 
-            app.UseWelcomePage(); 
+            //appl.Use<HelloWorldComponent>();
+
+            //app.UseWelcomePage(); 
 
             //app.Run(ctx => 
             //{
             //    return ctx.Response.WriteAsync("Hello there!");
             //});
         }
-
-
-
-
     }
 
+    public static class AppBuilderExtensions
+    {
+        public static void UseHelloWorld(this IAppBuilder app)
+        {
+            app.Use<HelloWorldComponent>();
+        }
+    
+    }
+
+    public class HelloWorldComponent
+    {
+        AppFunc _next;
+        public HelloWorldComponent(AppFunc next)
+        {
+            _next = next;
+        }
+        public /*async*/ Task Invoke(IDictionary<string, object> environment)
+        {
+            //await _next(environment);
+
+            var responce = environment["owin.ResponseBody"] as Stream;
+            using (var writer = new StreamWriter(responce))
+            {
+                return writer.WriteAsync("Hello there 2!!!");
+            }
+        }
+    }
 
 }
