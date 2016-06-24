@@ -31,6 +31,28 @@ namespace ConsoleApplicationKATANA
     {
         public void Configuration(IAppBuilder appl)
         {
+            //1. middleware
+            appl.Use(async (environment, next) =>
+            {
+                foreach (var pair in environment.Environment)
+                {
+                    Console.WriteLine("{0}:{1}", pair.Key, pair.Value);
+                }
+                await next();
+            }
+            );
+
+            //2. middleware
+            appl.Use(async (environment, next) =>
+            {
+                Console.WriteLine("Requesting : "+ environment.Request.Path);
+                
+                await next();
+
+                Console.WriteLine("Response: " + environment.Response.StatusCode);
+            }
+            );
+
 
             appl.UseHelloWorld();
 
