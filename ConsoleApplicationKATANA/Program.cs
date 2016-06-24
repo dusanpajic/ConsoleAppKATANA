@@ -10,6 +10,7 @@ namespace ConsoleApplicationKATANA
 {
 
     using System.IO;
+    using System.Web.Http;
     using AppFunc = Func<IDictionary<string, object>, Task>;
 
     class Program
@@ -31,31 +32,34 @@ namespace ConsoleApplicationKATANA
     {
         public void Configuration(IAppBuilder appl)
         {
-            //1. middleware
-            appl.Use(async (environment, next) =>
-            {
-                foreach (var pair in environment.Environment)
-                {
-                    Console.WriteLine("{0}:{1}", pair.Key, pair.Value);
-                }
-                await next();
-            }
-            );
+            ////1. middleware
+            //appl.Use(async (environment, next) =>
+            //{
+            //    foreach (var pair in environment.Environment)
+            //    {
+            //        Console.WriteLine("{0}:{1}", pair.Key, pair.Value);
+            //    }
+            //    await next();
+            //}
+            //);
 
             //2. middleware
             appl.Use(async (environment, next) =>
             {
-                Console.WriteLine("Requesting : "+ environment.Request.Path);
-                
+                Console.WriteLine("Requesting : " + environment.Request.Path);
+
                 await next();
 
                 Console.WriteLine("Response: " + environment.Response.StatusCode);
             }
             );
 
+            ConfigureWebApi(appl);
+
 
             appl.UseHelloWorld();
 
+            #region prethodni
             //appl.Use<HelloWorldComponent>();
 
             //app.UseWelcomePage(); 
@@ -64,6 +68,17 @@ namespace ConsoleApplicationKATANA
             //{
             //    return ctx.Response.WriteAsync("Hello there!");
             //});
+            #endregion
+        }
+
+        private void ConfigureWebApi(IAppBuilder appl)
+        {
+            var config = new HttpConfiguration();
+            config.Routes.MapHttpRoute(
+                "DefaultApi",
+                "api/{controller}/{id}",
+                new { id = RouteParameter.Optional });
+            appl.UseWebApi(config);
         }
     }
 
