@@ -13,25 +13,27 @@ namespace ConsoleApplicationKATANA
     using System.Web.Http;
     using AppFunc = Func<IDictionary<string, object>, Task>;
 
-    class Program
-    {
-        static void Main(string[] args)
-        {
-            string uri = "http://localhost:8080";
-            using (WebApp.Start<Startup>(uri))
-            {
-                Console.WriteLine("started!");               
-                Console.ReadKey();
-                Console.WriteLine("stopping");
-            };
-
-        }
-    }
-
+    #region (not with IIS Exspr)
+    //class Program 
+    //{
+    //    #region main 
+    //    static void Main(string[] args)
+    //    {
+    //        string uri = "http://localhost:8080";
+    //        using (WebApp.Start<Startup>(uri))
+    //        {
+    //            Console.WriteLine("started!");
+    //            Console.ReadKey();
+    //            Console.WriteLine("stopping");
+    //        };
+    //    }
+    //}
+    #endregion
     public class Startup     
     {
         public void Configuration(IAppBuilder appl)
         {
+            #region //1. middleware
             ////1. middleware
             //appl.Use(async (environment, next) =>
             //{
@@ -42,7 +44,10 @@ namespace ConsoleApplicationKATANA
             //    await next();
             //}
             //);
+            #endregion
 
+
+            #region 2. middleware
             //2. middleware
             appl.Use(async (environment, next) =>
             {
@@ -52,14 +57,15 @@ namespace ConsoleApplicationKATANA
 
                 Console.WriteLine("Response: " + environment.Response.StatusCode);
             }
-            );
+            ); 
+            #endregion
 
             ConfigureWebApi(appl);
 
 
             appl.UseHelloWorld();
 
-            #region prethodni
+            #region //prethodni prve verzije
             //appl.Use<HelloWorldComponent>();
 
             //app.UseWelcomePage(); 
@@ -68,7 +74,7 @@ namespace ConsoleApplicationKATANA
             //{
             //    return ctx.Response.WriteAsync("Hello there!");
             //});
-            #endregion
+            #endregion 
         }
 
         private void ConfigureWebApi(IAppBuilder appl)
@@ -78,6 +84,7 @@ namespace ConsoleApplicationKATANA
                 "DefaultApi",
                 "api/{controller}/{id}",
                 new { id = RouteParameter.Optional });
+
             appl.UseWebApi(config);
         }
     }
